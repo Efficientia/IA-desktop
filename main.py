@@ -6,7 +6,8 @@ from langchain_groq import ChatGroq
 from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
 
-from sys_prompt import PERSONA_SISTEMA
+from sys_prompt import PERSONA_SISTEMA, ROUTER_PROMPT_COMPLETO, FAQ_PROMPT_COMPLETO
+from tools.faq_tools import faq_retriever
 
 # ==============================================================================
 # CONFIGURAÇÃO
@@ -27,6 +28,38 @@ llm_groq = ChatGroq(
     top_p=0.95,
     api_key=os.getenv("GROQ_API_KEY"),
 )
+
+llm_rapido = ChatGroq(
+  model    ="qwen/qwen3-32b",
+  temperature=0.5,
+  top_p=0.95,
+  api_key=os.getenv("GROQ_API_KEY")
+)
+
+llm_especialista = llm_gemini.with_fallbacks([llm_groq])
+
+
+router_app=create_agent(
+  model=llm_rapido,
+#   tools=TOOLS,  ### VINDO DO PG_TOOLS
+  system_prompt=ROUTER_PROMPT_COMPLETO,
+)
+faq_app=create_agent(
+    model=llm_rapido,
+    # tools=TOOLS + [faq_retriever],
+    system_prompt=FAQ_PROMPT_COMPLETO,
+)
+
+
+checkpointer = MemorySaver()
+app = create_agent(
+  model = llm_especialista,
+#   tools=TOOLS,
+#   system_prompt=SYSTEM_PROMPT_COMPLETO,
+  checkpointer=checkpointer,
+)
+
+
 
 # Gemini é o principal.
 # Caso esteja indisponível, utiliza o Groq.
