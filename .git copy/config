@@ -1,0 +1,16 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/Efficientia/IA-desktop.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "teste-e-MVP"]
+	remote = origin
+	merge = refs/heads/teste-e-MVP
+	vscode-merge-base = origin/teste-e-MVP
+[branch "master"]
+	vscode-merge-base = origin/main
