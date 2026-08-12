@@ -1,13 +1,29 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
+
+# Carrega o .env a partir da pasta app/
+load_dotenv(Path(__file__).parent / ".env")
+
+from fastapi import FastAPI
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
 
-from sys_prompt import PERSONA_SISTEMA, ROUTER_PROMPT_COMPLETO, FAQ_PROMPT_COMPLETO
-from tools.faq_tools import faq_retriever
+from app.core.prompts import PERSONA_SISTEMA, ROUTER_PROMPT_COMPLETO, FAQ_PROMPT_COMPLETO
+from app.tools.faq_tools import faq_retriever
+
+api = FastAPI()
+
+@api.get("/")
+def read_root():
+    return {"message": "EficientIA API is running"}
+
+# Para rodar com FastAPI: uvicorn app.main:api --reload
+
+
 
 # ==============================================================================
 # CONFIGURAÇÃO

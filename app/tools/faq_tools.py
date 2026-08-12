@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from langchain.tools import tool
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -7,7 +6,6 @@ from langchain_community.vectorstores import FAISS
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-load_dotenv()
 
 MD_PATH = os.getenv("FAQ", "FAQ.md")
 # Substituição do PyPDFLoader pelo TextLoader para leitura do .md
