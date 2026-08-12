@@ -1,6 +1,0 @@
-0000000000000000000000000000000000000000 d2af58360fc1e16c7a2296c7c25a26add5371842 Lucas Guerriero Santos <guerrierosantoslucas@gmail.com> 1785766861 -0300	initial pull
-d2af58360fc1e16c7a2296c7c25a26add5371842 014bb6482a433294f1c98fefb8ae7fcd73b0e2bc Lucas Guerriero Santos <guerrierosantoslucas@gmail.com> 1785767084 -0300	checkout: moving from master to teste-e-MVP
-014bb6482a433294f1c98fefb8ae7fcd73b0e2bc d2af58360fc1e16c7a2296c7c25a26add5371842 Lucas Guerriero Santos <guerrierosantoslucas@gmail.com> 1785767171 -0300	checkout: moving from teste-e-MVP to master
-d2af58360fc1e16c7a2296c7c25a26add5371842 2eff7365d64ec762d43dfceeb74c1f62f41584ec Lucas Guerriero Santos <guerrierosantoslucas@gmail.com> 1785767372 -0300	merge teste-e-MVP: Merge made by the 'ort' strategy.
-2eff7365d64ec762d43dfceeb74c1f62f41584ec 03c9927b0f378d49149fe804fdf3536fdbad0309 Lucas Guerriero Santos <guerrierosantoslucas@gmail.com> 1785767444 -0300	commit: correção de versões (para melhorar a experiência de atualizar o código)
-03c9927b0f378d49149fe804fdf3536fdbad0309 e57761975967d184bc2447ec791ccfe16a52800d Lucas Guerriero Santos <guerrierosantoslucas@gmail.com> 1786108257 -0300	commit: feat/EFFICIENTI-83: primeira versão 100% funcional da IA (tool de FAQ e prompt de sistema completo com base no material até então disponível)
