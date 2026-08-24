@@ -1,0 +1,14 @@
+dotenv
+langchain_google_genai
+langchain_groq
+langchain
+fastapi
+uvicorn
+python-dotenv
+langchain-community
+langchain-text-splitters
+langgraph
+langgraph-checkpoint-mongodb
+motor
+pydantic
+faiss-cpu

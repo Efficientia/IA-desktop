@@ -1,4 +1,5 @@
 import os
+from app.config import GEMINI_API_KEY
 from langchain.tools import tool
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -20,7 +21,7 @@ def faq_retriever(query: str) -> str:
 
     embeddings = GoogleGenerativeAIEmbeddings(
         model="embedding-2-preview",
-        google_api_key=os.getenv("GEMINI_API_KEY"),
+        google_api_key=GEMINI_API_KEY,
     )
 
     db = FAISS.from_documents(chunks, embeddings)
