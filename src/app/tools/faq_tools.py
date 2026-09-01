@@ -1,5 +1,5 @@
 import os
-from app.config import GEMINI_API_KEY
+from src.app.config import GEMINI_API_KEY
 from langchain.tools import tool
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter

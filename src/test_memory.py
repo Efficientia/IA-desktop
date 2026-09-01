@@ -1,5 +1,5 @@
-from app.memory import iniciar_sessao, salvar_mensagem, encerrar_sessao, sessoes
-from app.tools.memoria import buscar_historico
+from src.app.memory import iniciar_sessao, salvar_mensagem, encerrar_sessao, sessoes
+from src.app.tools.memoria import buscar_historico
 import uuid
 
 def test_memory():

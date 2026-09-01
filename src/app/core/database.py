@@ -1,4 +1,4 @@
-from app.config import MONGODB_URI, MONGO_DB_NAME
+from src.app.config import MONGODB_URI, MONGO_DB_NAME
 from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 from langgraph.checkpoint.mongodb import MongoDBSaver

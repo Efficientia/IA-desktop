@@ -1,8 +1,8 @@
 import os
 from pymongo import MongoClient
-from app.config import MONGODB_URI, MONGO_DB_NAME
-from app.llms import llm
-from app.guardrail import guardrail_saida
+from src.app.config import MONGODB_URI, MONGO_DB_NAME
+from src.app.llms import llm
+from src.app.guardrail import guardrail_saida
 
 from datetime import datetime
 

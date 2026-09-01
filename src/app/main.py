@@ -20,7 +20,7 @@ app.add_middleware(
 )
 
 
-from app.routes.chat import router as chat_router
+from src.app.routes.chat import router as chat_router
 app.include_router(chat_router)
 
 # ==============================================================================

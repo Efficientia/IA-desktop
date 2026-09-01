@@ -1,6 +1,6 @@
 import operator
 from typing import Annotated, TypedDict
-from app.llms import llm_gemini, llm_groq, llm_rapido, llm_especialista
+from src.app.llms import llm_gemini, llm_groq, llm_rapido, llm_especialista
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import MessagesState
 from langchain_core.messages import RemoveMessage
@@ -11,19 +11,19 @@ import os
 
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.runnables import RunnableConfig
-from app.tools.analise_dados import TOOLS
-from app.tools.faq_tools import faq_retriever
-from app.tools.memoria import TOOLS_MEMORIA
-from app.tools.planejamento import TOOLS_AGENDA
-from app.memory import salvar_mensagem
-from app.core.prompts import (
+from src.app.tools.analise_dados import TOOLS
+from src.app.tools.faq_tools import faq_retriever
+from src.app.tools.memoria import TOOLS_MEMORIA
+from src.app.tools.planejamento import TOOLS_AGENDA
+from src.app.memory import salvar_mensagem
+from src.app.core.prompts import (
     ROUTER_PROMPT_COMPLETO,
     ANALISE_DADOS_PROMPT_COMPLETO,
     PLANEJAMENTO_PROMPT_COMPLETO,
     ORQUESTRADOR_PROMPT_COMPLETO,
     FAQ_PROMPT_COMPLETO,
 )
-from app.guardrail import guardrail_entrada, guardrail_saida, anonimizar_entrada, desanonimizar_saida
+from src.app.guardrail import guardrail_entrada, guardrail_saida, anonimizar_entrada, desanonimizar_saida
 from datetime import datetime
 
 

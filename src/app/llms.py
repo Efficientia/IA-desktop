@@ -1,6 +1,6 @@
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
-from app.config import GEMINI_API_KEY
+from src.app.config import GEMINI_API_KEY
 
 # Gemini é o principal.
 llm_gemini = ChatGoogleGenerativeAI(

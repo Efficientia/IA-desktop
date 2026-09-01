@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.schemas import ChatRequest, ChatResponse          # ← adicionar algo que vem do schema
-from app.graph import executar_fluxo_assistente
+from src.app.schemas import ChatRequest, ChatResponse          # ← adicionar algo que vem do schema
+from src.app.graph import executar_fluxo_assistente
 
 router = APIRouter(tags=["chat"])
 

@@ -1,5 +1,5 @@
-from app.memory import sessoes
-from app.guardrail import guardrail_saida
+from src.app.memory import sessoes
+from src.app.guardrail import guardrail_saida
 from langchain.tools import tool
 @tool
 def buscar_historico(query: str):

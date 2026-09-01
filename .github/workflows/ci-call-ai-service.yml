@@ -1,0 +1,23 @@
+# ==============================================================================
+# Caller CI - Módulo de IA (Python FastAPI & LangGraph AI)
+# Repositório de Destino: ai-service / IA-desktop
+# Coloque em: .github/workflows/ci-call.yml no repositório de IA
+# ==============================================================================
+
+name: CI Call - AI Service Python FastAPI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  call-ai-ci:
+    name: Executar CI Python FastAPI Centralizado
+    uses: Efficientia/.github/.github/workflows/ci-python-fastapi.yml@main
+    with:
+      python-version: '3.11'

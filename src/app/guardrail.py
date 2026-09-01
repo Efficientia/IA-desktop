@@ -7,7 +7,7 @@ SAÍDA    → redigir PII → desanonimizar → revisar compliance (LLM)
 import os
 import re
 import uuid
-from app.llms import llm_rapido
+from src.app.llms import llm_rapido
 
 llm = llm_rapido
 
