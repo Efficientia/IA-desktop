@@ -4,19 +4,25 @@ from dotenv import load_dotenv
 
 # BASE_DIR aponta para migracao_fastAPI/. Montado a partir da localização
 # do próprio arquivo: não depende da pasta de onde você rodou o uvicorn.
-BASE_DIR     = Path(__file__).resolve().parent.parent
+BASE_DIR     = Path(__file__).resolve().parent
 DATA_DIR     = BASE_DIR / "data"
 
-FAQ_PATH = DATA_DIR / "FAQ_assessor_v1.1.pdf"
+print(f"DEBUG: BASE_DIR={BASE_DIR}")
+load_dotenv(BASE_DIR / ".env")
+print(f"DEBUG: GEMINI_API_KEY={os.getenv('GEMINI_API_KEY')}")
 
-load_dotenv(BASE_DIR / ".env")          # o único load_dotenv() do projeto
+DATA_DIR     = BASE_DIR / "data"
+
+FAQ_PATH = DATA_DIR / "FAQ_gestao_v1.1.pdf"
+
+
 
 GEMINI_API_KEY  = os.getenv("GEMINI_API_KEY")
 GROQ_API_KEY    = os.getenv("GROQ_API_KEY")
 GOOGLE_API_KEY  = os.getenv("GOOGLE_API_KEY", GEMINI_API_KEY)
 DATABASE_URL    = os.getenv("DATABASE_URL")
 MONGODB_URI     = os.getenv("MONGO_URI")
-MONGO_DB_NAME   = os.getenv("MONGO_DB_NAME")
+MONGO_DB_NAME   = os.getenv("MONGO_DB_NAME", "gestao_dados")
 MONGO_IP        = os.getenv("MONGO_IP")
 MONGO_USER      = os.getenv("MONGO_USER")
 MONGO_PASSWORD  = os.getenv("MONGO_PASSWORD")

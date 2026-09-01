@@ -8,7 +8,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
-MD_PATH = os.getenv("FAQ", "FAQ.md")
+MD_PATH = os.getenv("FAQ", "data/FAQ.md")
 # Substituição do PyPDFLoader pelo TextLoader para leitura do .md
 loader = TextLoader(MD_PATH, encoding='utf-8') 
 docs = loader.load()

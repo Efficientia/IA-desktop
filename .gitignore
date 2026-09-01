@@ -1,4 +1,4 @@
 .env
-FAQ.md
 comandos.txt
 seed_db.py
+banco.json
