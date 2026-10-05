@@ -25,13 +25,13 @@ PII = [
 # ==============================================================================
 # HELPERS
 # ==============================================================================
+def _limpar_protocolos(texto: str) -> str:
+    """Remove protocolos internos (ROUTE=, PERGUNTA_ORIGINAL=) do LLM."""
+    texto = re.sub(r"ROUTE=\w+", "", texto)
+    texto = re.sub(r"PERGUNTA_ORIGINAL=\[.*?\]", "", texto, flags=re.DOTALL)
+    return texto.strip()
+
 def _obter_texto(conteudo) -> str:
-    """Extrai texto de forma segura de strings, listas ou objetos de mensagem."""
-    if hasattr(conteudo, "text") and conteudo.text:
-        return str(conteudo.text).strip()
-    if hasattr(conteudo, "content"):
-        c = conteudo.content
-    else:
         c = conteudo
     if isinstance(c, str):
         return c.strip()
@@ -189,13 +189,13 @@ def guardrail_saida(resposta, mapa_pii, restaurar_pii=False):
     """
     if not isinstance(resposta, str):
         resposta = _obter_texto(resposta)
+    
+    # 0. Limpa protocolos vazados
+    resposta = _limpar_protocolos(resposta)
 
     # 1. Remove PII que o modelo tenha gerado
     for tipo, padrao in PII:
         resposta = re.sub(padrao, f"[{tipo} OMITIDO]", resposta)
-
-    # 2. Resolve tokens de PII da entrada
-    resposta = desanonimizar_saida(resposta, mapa_pii, restaurar=restaurar_pii)
 
     # 3. Revisão de compliance
     resp_llm = llm.invoke(_PROMPT_COMPLIANCE.format(resposta=resposta))
