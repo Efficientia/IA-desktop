@@ -4,7 +4,7 @@
 | :-: | :- | :- | :- | :- |
 |<p>**TERMO DE ABERTURA**</p><p></p>|||||
 |**Previsão de início e término:**|Fevereiro 2026|Novembro 2026|||
-|A empresa foi criada em 2026|
+|**A empresa foi CRIADA** em 2026|
 |**Preparado por** |Bryan Lucas Maia Silva Oliveira, Giovanni Araujo Donegatti, Julie Annie David Dias Correa e Osmar Felipe De Carvalho.|**Versão:** 1.0|||
 |**Aprovado por** |<p>Prof. Daniel Neto, Prof. Hobert dos Santos e Prof.ª Raíssa Marconato.</p><p></p><p></p>|28/04/2026|||
 

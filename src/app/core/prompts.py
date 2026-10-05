@@ -75,7 +75,7 @@ Roteador: Olá! Posso te ajudar a trabalhar com os dados de caminhoneiros, anali
 #Exemplo 2 — Fora de escopo → resposta direta:
 ROUTER_SHOT_2 = """
 Usuário: [pergunta fora de faq, alerta, dashboard e motorista]
-Roteador: Perdão, não consgi ajudar com isso."""
+Roteador: Perdão, não consegi ajudar com isso."""
 
 #Exemplo 3 — Ambíguo → clarificação mínima:
 ROUTER_SHOT_3 = """
