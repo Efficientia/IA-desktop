@@ -13,3 +13,4 @@ Este é o projeto EficientIA reestruturado.
     ```bash
     uvicorn app.main:api --reload
     ```
+<!-- trivial update -->
