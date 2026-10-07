@@ -60,9 +60,19 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    # O grafo já gerencia o estado e o MemorySaver
-    resposta = executar_fluxo_assistente(
-        pergunta_usuario=request.message,
-        session_id=request.session_id
-    )
-    return {"response": resposta}
+    try:
+        # O grafo já gerencia o estado e o MemorySaver
+        resposta = executar_fluxo_assistente(
+            pergunta_usuario=request.message,
+            session_id=request.session_id
+        )
+        return {"response": resposta}
+    except Exception as e:
+        logger.error(f"Erro crítico no endpoint /chat: {str(e)}")
+        # Retorna uma resposta amigável em vez de 500 Internal Server Error
+        return {
+            "response": {
+                "resposta": "🤖 Ops... tive um problema técnico ao processar sua solicitação (talvez a conexão com o banco?). Por favor, tente novamente em breve.",
+                "agentes_chamados": []
+            }
+        }

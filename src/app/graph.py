@@ -23,14 +23,15 @@ from src.app.core.prompts import (
     ORQUESTRADOR_PROMPT_COMPLETO,
     FAQ_PROMPT_COMPLETO,
 )
-from src.app.guardrail import guardrail_entrada, guardrail_saida, anonimizar_entrada, desanonimizar_saida
+from src.app.guardrail import guardrail_entrada, guardrail_saida, anonimizar_entrada, desanonimizar_saida, _limpar_protocolos
+import re
 from datetime import datetime
 
 
 agora = datetime.now().strftime("%H:%M:%S")
 
 
-router_app       = create_react_agent(model=llm_rapido,       tools=TOOLS_MEMORIA,                prompt=ROUTER_PROMPT_COMPLETO)
+router_app       = create_react_agent(model=llm_rapido,       tools=[],                            prompt=ROUTER_PROMPT_COMPLETO)
 analise_dados_app = create_react_agent(model=llm_especialista, tools=TOOLS + TOOLS_MEMORIA,        prompt=ANALISE_DADOS_PROMPT_COMPLETO)
 # Orquestrador utiliza invocação direta do modelo com prompt de sistema (sem tools)
 faq_app          = create_react_agent(model=llm_rapido,       tools=[faq_retriever],               prompt=FAQ_PROMPT_COMPLETO)
@@ -54,6 +55,8 @@ class Estado(MessagesState):                                  # ID da sessão
 # NÓS
 # ==============================================================================
 def _obter_texto(msg) -> str:
+    if msg is None:
+        return ""
     if hasattr(msg, "text") and msg.text:
         return str(msg.text).strip()
     if hasattr(msg, "content"):
@@ -67,16 +70,31 @@ def _obter_texto(msg) -> str:
         for item in c:
             if isinstance(item, str):
                 partes.append(item)
-            elif isinstance(item, dict) and "text" in item:
-                partes.append(str(item["text"]))
+            elif isinstance(item, dict):
+                if "text" in item and item["text"]:
+                    partes.append(str(item["text"]))
             elif hasattr(item, "text") and item.text:
                 partes.append(str(item.text))
-        return "\n".join(partes).strip()
+        if partes:
+            return "\n".join(partes).strip()
     return str(c).strip()
 
+def _extrair_pergunta_protocolo(texto: str) -> str:
+    if not texto:
+        return ""
+    match = re.search(r"PERGUNTA_ORIGINAL=\[(.*?)\]", texto, flags=re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    match_sem_colchetes = re.search(r"PERGUNTA_ORIGINAL=(.*)", texto, flags=re.DOTALL)
+    if match_sem_colchetes:
+        return match_sem_colchetes.group(1).strip()
+    return _limpar_protocolos(texto)
+
+
 def no_roteador(estado: Estado, config: RunnableConfig) -> dict:
-    # O `config` é injetado pelo LangGraph nos nós que o declaram na assinatura.
-    saida = router_app.invoke({"messages": list(estado["messages"])}, config=config)
+    # Manter janela deslizante de no máximo as últimas 6 mensagens para não inflar o contexto
+    mensagens_recentes = list(estado["messages"])[-6:]
+    saida = router_app.invoke({"messages": mensagens_recentes}, config=config)
     texto = _obter_texto(saida["messages"][-1])
 
     # Resposta direta (saudação, fora de escopo): já escreve no campo final
@@ -94,11 +112,14 @@ def no_roteador(estado: Estado, config: RunnableConfig) -> dict:
 
 
 def no_analise_dados(estado: Estado, config: RunnableConfig) -> dict:
+    entrada = estado.get("input") or ""
+    pergunta = _extrair_pergunta_protocolo(entrada) or entrada
     saida = analise_dados_app.invoke(
-        {"messages": [{"role": "human", "content": estado["input"]}]},
+        {"messages": [{"role": "human", "content": pergunta}]},
         config=config,
     )
     texto = _obter_texto(saida["messages"][-1])
+    texto = _limpar_protocolos(texto)
     return {
         "saida_especialista": texto,
         "resposta_final":     texto,
@@ -106,19 +127,21 @@ def no_analise_dados(estado: Estado, config: RunnableConfig) -> dict:
     }
 
 
-
-
 def no_faq(estado: Estado, config: RunnableConfig) -> dict:
+    entrada = estado.get("input") or ""
+    pergunta = _extrair_pergunta_protocolo(entrada) or entrada
     saida = faq_app.invoke(
-        {"messages": [{"role": "human", "content": estado["input"]}]},
+        {"messages": [{"role": "human", "content": pergunta}]},
         config=config,
     )
     texto = _obter_texto(saida["messages"][-1])
+    texto = _limpar_protocolos(texto)
     return {
         "saida_especialista": texto,
-        "resposta_final":     texto,  # bypassa o orquestrador
+        "resposta_final":     texto,
         "agentes_chamados":   ["faq"],
     }
+
 
 def no_orquestrador(estado: Estado, config: RunnableConfig) -> dict:
     conteudo_entrada = estado.get("saida_especialista") or estado.get("input") or ""
@@ -128,10 +151,12 @@ def no_orquestrador(estado: Estado, config: RunnableConfig) -> dict:
     ]
     resp = llm_rapido.invoke(mensagens)
     texto = _obter_texto(resp)
+    texto = _limpar_protocolos(texto)
     return {
         "resposta_final":   texto,
         "agentes_chamados": ["orquestrador"],
     }
+
 
 
 # === Quero e TENHO que estudar isso ===
@@ -226,12 +251,10 @@ grafo.add_conditional_edges(
         "fim":        END,       # resposta direta: sem especialista nem orquestrador
     },
 )
-
 grafo.add_edge("analise_dados",   "orquestrador")
 grafo.add_edge("orquestrador", "guardrail_saida")
-grafo.add_edge("guardrail_saida", END)   # resposta do orquestrador passa pelo guardrail de saída para revisão final
-grafo.add_edge("faq",          END)
-
+grafo.add_edge("faq",          "guardrail_saida")
+grafo.add_edge("guardrail_saida", END)
 # Memória centralizada no grafo — persiste o Estado inteiro entre turns
 memory = MemorySaver()
 fluxo_agentes = grafo.compile(checkpointer=memory)

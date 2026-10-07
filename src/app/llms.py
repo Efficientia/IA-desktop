@@ -4,7 +4,7 @@ from langchain_groq import ChatGroq
 from src.app.config import GEMINI_API_KEY, GROQ_API_KEY
 
 _MODEL_RAPIDO = os.getenv("GEMINI_MODEL_RAPIDO", os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"))
-_MODEL_ESPECIALISTA = os.getenv("GEMINI_MODEL_ESPECIALISTA", os.getenv("GEMINI_MODEL", "gemini-3.5-flash"))
+_MODEL_ESPECIALISTA = os.getenv("GEMINI_MODEL_ESPECIALISTA", os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"))
 _MODEL_GROQ = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 # Modelo rápido para guardrails, roteador e orquestrador

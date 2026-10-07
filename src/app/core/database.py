@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 from src.app.config import MONGO_URI, MONGO_DB_NAME, DATABASE_URL
 from sqlalchemy import create_engine, text
 from datetime import datetime, timezone
@@ -7,6 +8,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from langgraph.checkpoint.mongodb import MongoDBSaver
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
+
+logger = logging.getLogger("efficientia_sre")
 
 # ==============================================================================
 # CONFIGURAÇÃO DE CONEXÃO MONGODB
@@ -75,6 +78,51 @@ async def salvar_mensagem_historico(mensagem: MessageModel):
 # ==============================================================================
 _pg_engine = None
 
+
+def _normalizar_url_postgres(url: str) -> str:
+    """
+    Valida e normaliza a DATABASE_URL para o formato aceito pelo SQLAlchemy:
+        postgresql+psycopg2://usuario:senha@host:porta/banco
+    """
+    url = url.strip().strip('"').strip("'")
+
+    # URL no formato JDBC (Java) não funciona no SQLAlchemy/psycopg2.
+    if url.startswith("jdbc:"):
+        raise ValueError(
+            "DATABASE_URL está em formato JDBC ('jdbc:...'). Use o formato "
+            "'postgresql+psycopg2://usuario:senha@host:porta/banco'. "
+            "No Supabase: Connect > URI (Session pooler)."
+        )
+
+    # 'postgres://' (legado) e 'postgresql://' sem driver -> psycopg2 explícito
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+    if not url.startswith("postgresql"):
+        raise ValueError(
+            "DATABASE_URL inválida: deve começar com 'postgresql+psycopg2://'."
+        )
+
+    # Sem '@' não há usuário/senha na URL (erro comum ao copiar string JDBC)
+    if "@" not in url:
+        raise ValueError(
+            "DATABASE_URL sem usuário e senha. Formato esperado: "
+            "postgresql+psycopg2://usuario:senha@host:porta/banco "
+            "(no pooler do Supabase o usuário é 'postgres.<project-ref>')."
+        )
+
+    return url
+
+
+def _testar_engine(url: str):
+    engine = create_engine(url, pool_pre_ping=True, connect_args={"connect_timeout": 5})
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    return engine
+
+
 def get_postgres_engine():
     """
     Retorna a engine do SQLAlchemy para conexão ao banco de dados PostgreSQL.
@@ -84,25 +132,36 @@ def get_postgres_engine():
     if _pg_engine is not None:
         return _pg_engine
 
-    url = DATABASE_URL or os.getenv("DATABASE_URL")
-    if not url:
+    url_original = DATABASE_URL or os.getenv("DATABASE_URL")
+    if not url_original:
         raise ValueError("DATABASE_URL não configurada no ambiente.")
 
+    # Se a URL estiver em formato inválido, o erro já é claro e explicativo.
+    url = _normalizar_url_postgres(url_original)
+
     try:
-        engine = create_engine(url, pool_pre_ping=True, connect_args={"connect_timeout": 5})
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        _pg_engine = engine
+        _pg_engine = _testar_engine(url)
         return _pg_engine
     except Exception:
+        # Registra o erro REAL (antes ele era engolido pelo fallback/raise)
+        logger.exception("Falha ao conectar no PostgreSQL com a DATABASE_URL configurada")
+
         # Fallback para pooler Supabase caso a resolução direta do host falhe
-        match = re.search(r"postgresql://([^:]+):([^@]+)@db\.([a-z0-9]+)\.supabase\.co:(\d+)/(.*)", url)
+        # (host direto: db.<ref>.supabase.co)
+        match = re.search(
+            r"postgresql(?:\+psycopg2)?://([^:]+):([^@]+)@db\.([a-z0-9]+)\.supabase\.co:(\d+)/(.*)",
+            url,
+        )
         if match:
             user, pwd, ref, port, db_name = match.groups()
-            pooler_url = f"postgresql://{user}.{ref}:{pwd}@aws-0-sa-east-1.pooler.supabase.com:6543/{db_name}"
-            engine = create_engine(pooler_url, pool_pre_ping=True, connect_args={"connect_timeout": 5})
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-            _pg_engine = engine
-            return _pg_engine
+            pooler_url = (
+                f"postgresql+psycopg2://{user}.{ref}:{pwd}"
+                f"@aws-0-sa-east-1.pooler.supabase.com:6543/{db_name}"
+            )
+            try:
+                _pg_engine = _testar_engine(pooler_url)
+                return _pg_engine
+            except Exception:
+                logger.exception("Falha também no fallback via pooler do Supabase")
+                raise
         raise
