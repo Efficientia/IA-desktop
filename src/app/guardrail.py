@@ -32,6 +32,13 @@ def _limpar_protocolos(texto: str) -> str:
     return texto.strip()
 
 def _obter_texto(conteudo) -> str:
+    if conteudo is None:
+        return ""
+    if hasattr(conteudo, "text") and conteudo.text:
+        return str(conteudo.text).strip()
+    if hasattr(conteudo, "content"):
+        c = conteudo.content
+    else:
         c = conteudo
     if isinstance(c, str):
         return c.strip()
@@ -40,11 +47,13 @@ def _obter_texto(conteudo) -> str:
         for item in c:
             if isinstance(item, str):
                 partes.append(item)
-            elif isinstance(item, dict) and "text" in item:
-                partes.append(str(item["text"]))
+            elif isinstance(item, dict):
+                if "text" in item and item["text"]:
+                    partes.append(str(item["text"]))
             elif hasattr(item, "text") and item.text:
                 partes.append(str(item.text))
-        return "\n".join(partes).strip()
+        if partes:
+            return "\n".join(partes).strip()
     return str(c).strip()
 
 def _bloquear(motivo, mensagem):
